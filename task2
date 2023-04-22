@@ -1,61 +1,49 @@
 using System;
-
 using System.Collections.Generic;
-
 using System.IO;
-
 using System.Linq;
+using System.Text;
 
-using System.Text.RegularExpressions;
-
-
-
-namespace task2
+internal class Program
 {
-    class Program
+    private static void Main(string[] args)
     {
-        static void Main()
+        const string FILENAME = @"C:\Users\su99y\source\repos\task\book.txt";
+        var filePath = File.ReadAllText(FILENAME, Encoding.UTF8);
+        if (filePath != null)
         {
-            string inputFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "book.txt");
-            string outputFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "word.txt");
-
-            try
+            var textDictionary = new Lib();
+            var wordDictionary = textDictionary.ConvertToDictionary(filePath);
+            StreamWriter uniqueWords = new StreamWriter(@"C:\Users\su99y\source\repos\task\word.txt");
             {
-                string content = File.ReadAllText(inputFile);
-                
-                char[] separators = new char[] { ' ', ',', '.', '!', '?', ';', ':', '-', '\n', '\r', '\t' };
-
-                string[] words = content.Split(separators, StringSplitOptions.RemoveEmptyEntries);
-
-                Dictionary<string, int> wordCount = new Dictionary<string, int>();
-                foreach (string word in words)
-                {
-                    if (wordCount.ContainsKey(word))
-                    {
-                        wordCount[word]++;
-                    }
-                    else
-                    {
-                        wordCount[word] = 1;
-                    }
-                }
-
-                var sortedWords = wordCount.OrderByDescending(w => w.Value);
-
-                using (StreamWriter writer = new StreamWriter(outputFile))
-                {
-                    foreach (var word in sortedWords)
-                    {
-                        writer.WriteLine($"{word.Key}\t{word.Value}");
-                    }
-                }
-
-                Console.WriteLine("Результат записан в файл.");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Ошибка: {ex.Message}");
+                foreach (var i in
+                         wordDictionary.OrderByDescending(x => x.Value))
+                    uniqueWords.WriteLine($"{i.Key} - {i.Value}");
             }
         }
+        else
+        {
+            Console.WriteLine("Пустой документ");
+        }
+    }
+}
+
+public class Lib
+{
+    public Dictionary<string, int> ConvertToDictionary(string filePath)
+    {
+        var answerBook = new Dictionary<string, int>();
+        char[] splitChars =
+        { ' ', ',', '.', ':', '\t', '<', '>', '\n', ')', '(', '!', '?', ';', '"', ']', '[', '/', '-', '*',};
+        var words = filePath.Split(splitChars).Select(word => word.ToLower()).ToArray();
+        var wordsItem = words.Distinct().ToArray();
+        foreach (var item in wordsItem)
+        {
+            var count = 0;
+            count = words.Where(word => word.Equals(item)).Count();
+            answerBook.Add(item, count);
+        }
+
+        return answerBook;
     }
 }
