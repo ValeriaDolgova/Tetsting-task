@@ -1,0 +1,61 @@
+using System;
+
+using System.Collections.Generic;
+
+using System.IO;
+
+using System.Linq;
+
+using System.Text.RegularExpressions;
+
+
+
+namespace task2
+{
+    class Program
+    {
+        static void Main()
+        {
+            string inputFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "book.txt");
+            string outputFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "word.txt");
+
+            try
+            {
+                string content = File.ReadAllText(inputFile);
+                
+                char[] separators = new char[] { ' ', ',', '.', '!', '?', ';', ':', '-', '\n', '\r', '\t' };
+
+                string[] words = content.Split(separators, StringSplitOptions.RemoveEmptyEntries);
+
+                Dictionary<string, int> wordCount = new Dictionary<string, int>();
+                foreach (string word in words)
+                {
+                    if (wordCount.ContainsKey(word))
+                    {
+                        wordCount[word]++;
+                    }
+                    else
+                    {
+                        wordCount[word] = 1;
+                    }
+                }
+
+                var sortedWords = wordCount.OrderByDescending(w => w.Value);
+
+                using (StreamWriter writer = new StreamWriter(outputFile))
+                {
+                    foreach (var word in sortedWords)
+                    {
+                        writer.WriteLine($"{word.Key}\t{word.Value}");
+                    }
+                }
+
+                Console.WriteLine("Результат записан в файл.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка: {ex.Message}");
+            }
+        }
+    }
+}
